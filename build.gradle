@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
 group 'com.tcg'
@@ -11,6 +12,13 @@ repositories {
     mavenCentral()
 }
 
+javafx {
+    version = "13"
+    modules = [ 'javafx.controls' ]
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
+
+mainClassName = 'com.tcg.contracttimelogger.ContractTimeLogger'

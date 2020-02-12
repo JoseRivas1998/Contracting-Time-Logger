@@ -12,6 +12,7 @@ public class ContractTimeLogger extends Application {
         App app = App.instance();
         app.mainStage = stage;
         app.switchContainer(new NewContract());
+        app.mainStage.show();
     }
 
     public static void main(String[] args) {

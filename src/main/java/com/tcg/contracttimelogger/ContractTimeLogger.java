@@ -1,22 +1,17 @@
 package com.tcg.contracttimelogger;
 
-import com.tcg.contracttimelogger.gui.containers.MoneyTest;
+import com.tcg.contracttimelogger.gui.containers.NewContract;
+import com.tcg.contracttimelogger.utils.App;
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class ContractTimeLogger extends Application {
 
     @Override
     public void start(Stage stage) {
-        String javaVersion = System.getProperty("java.version");
-        String javafxVersion = System.getProperty("javafx.version");
-        Label l = new Label("Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".");
-        Scene scene = new Scene(new StackPane(l, new MoneyTest()), 640, 480);
-        stage.setScene(scene);
-        stage.show();
+        App app = App.instance();
+        app.mainStage = stage;
+        app.switchContainer(new NewContract());
     }
 
     public static void main(String[] args) {

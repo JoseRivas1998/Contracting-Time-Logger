@@ -3,10 +3,11 @@ package com.tcg.contracttimelogger.data;
 import org.json.JSONObject;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class TimeRecord implements JSONAble {
+public class TimeRecord implements JSONAble, Comparable<TimeRecord> {
 
     public final LocalDateTime clockIn;
     private LocalDateTime clockOut;
@@ -64,6 +65,31 @@ public class TimeRecord implements JSONAble {
         double seconds = millis / 1000.0;
         double minutes = seconds / 60.0;
         return minutes / 60.0;
+    }
+
+    public boolean isOnOrAfter(LocalDate date) {
+        LocalDateTime midnight = date.atStartOfDay();
+        return clockIn.isAfter(midnight);
+    }
+
+    public boolean isOnOrBefore(LocalDate date) {
+        LocalDateTime endOfDay = date.atTime(23, 59);
+        LocalDateTime outTime;
+        if(isClockedOut()) {
+            outTime = clockOut;
+        } else {
+            outTime = clockIn;
+        }
+        return outTime.isBefore(endOfDay);
+    }
+
+    public boolean isBetween(LocalDate start, LocalDate end) {
+        return isOnOrAfter(start) && isOnOrBefore(end);
+    }
+
+    @Override
+    public int compareTo(TimeRecord o) {
+        return this.clockIn.compareTo(o.clockIn);
     }
 
     @Override

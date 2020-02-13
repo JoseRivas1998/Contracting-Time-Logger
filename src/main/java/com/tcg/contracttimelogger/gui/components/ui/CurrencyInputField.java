@@ -17,7 +17,7 @@ public class CurrencyInputField extends TextField {
         this.doubleValue = doubleValue;
         this.textProperty().addListener((observable, oldValue, newValue) -> {
             if (Pattern.matches("(([0-9]*)|([0-9]*\\.[0-9]?[0-9]?))", newValue)) {
-                this.doubleValue = Double.parseDouble(newValue);
+                this.doubleValue = newValue.isEmpty() ? 0.0 : Double.parseDouble(newValue);
             } else {
                 setText(oldValue);
             }

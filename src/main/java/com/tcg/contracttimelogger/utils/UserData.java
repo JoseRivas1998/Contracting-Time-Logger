@@ -43,13 +43,19 @@ public final class UserData implements JSONAble {
                 this.timeSheets.add(TimeSheet.ofJSON(timeSheet));
             }
         } catch (IOException ioe) {
-            File contractsFile = new File(Files.getAppFilePath(AppConstants.CONTRACTS_FILE));
+            final String path = Files.getAppFilePath(AppConstants.CONTRACTS_FILE);
+            System.out.printf("Unable to read contracts file, writing a new one to %s\n", path);
+            File contractsFile = new File(path);
             try {
                 Files.writeUTF8File(this.toJSON().toString(), contractsFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public int numberTimeSheets() {
+        return timeSheets.size();
     }
 
     @Override

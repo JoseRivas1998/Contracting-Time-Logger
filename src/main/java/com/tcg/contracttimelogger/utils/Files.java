@@ -31,10 +31,18 @@ public interface Files {
         }
     }
 
-    static String readContractsFile() {
+    static String readContractsFile() throws IOException {
         ensureDirectoryExists();
         File file = new File(getAppFilePath(AppConstants.CONTRACTS_FILE));
-        // TODO
+        return readUTF8File(file);
+    }
+
+    static void writeFile(String string, File file, Charset encoding) throws IOException {
+        FileUtils.writeStringToFile(file, string, encoding);
+    }
+
+    static void writeUTF8File(String string, File file) throws IOException {
+        writeFile(string, file, StandardCharsets.UTF_8);
     }
 
 }

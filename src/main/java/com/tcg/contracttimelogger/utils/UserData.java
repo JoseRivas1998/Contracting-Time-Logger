@@ -5,6 +5,8 @@ import com.tcg.contracttimelogger.data.TimeSheet;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,24 @@ public final class UserData implements JSONAble {
     }
 
     public void loadData() {
-
+        timeSheets.clear();
+        try {
+            String file = Files.readContractsFile();
+            JSONObject json = new JSONObject(file);
+            JSONAble.validate(json, "timeSheets");
+            JSONArray timeSheetsArr = json.getJSONArray("timeSheets");
+            for (int i = 0; i < timeSheetsArr.length(); i++) {
+                JSONObject timeSheet = timeSheetsArr.getJSONObject(i);
+                this.timeSheets.add(TimeSheet.ofJSON(timeSheet));
+            }
+        } catch (IOException ioe) {
+            File contractsFile = new File(Files.getAppFilePath(AppConstants.CONTRACTS_FILE));
+            try {
+                Files.writeUTF8File(this.toJSON().toString(), contractsFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

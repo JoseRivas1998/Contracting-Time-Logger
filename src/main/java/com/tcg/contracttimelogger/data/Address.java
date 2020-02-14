@@ -64,4 +64,9 @@ public final class Address implements JSONAble {
     public int hashCode() {
         return Objects.hash(street, city, state, zipCode);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s\n%s, %s %s", street, city, state, zipCode);
+    }
 }

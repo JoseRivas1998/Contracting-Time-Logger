@@ -32,7 +32,12 @@ public class App {
         mainScene = new Scene(uiContainer);
         mainStage.setScene(mainScene);
         mainUIContainer = uiContainer;
-        mainUIContainer.onAfterViewCreated();
+        String title = mainUIContainer.onAfterViewCreated();
+        setTitle(title + " | Contracting Time Logger");
+    }
+
+    public void setTitle(String title) {
+        mainStage.setTitle(title);
     }
 
 }

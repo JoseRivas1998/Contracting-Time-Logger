@@ -31,7 +31,7 @@ public class TimeSheet implements JSONAble {
     public static TimeSheet ofJSON(JSONObject json) {
         JSONAble.validate(json, "contract", "timeRecords");
         Contract contract = Contract.ofJSON(json.getJSONObject("contract"));
-        JSONArray records = json.getJSONArray("records");
+        JSONArray records = json.getJSONArray("timeRecords");
         TimeSheet timeSheet = TimeSheet.newSheet(contract);
         for (int i = 0; i < records.length(); i++) {
             JSONObject recordJSON = records.getJSONObject(i);
@@ -105,6 +105,6 @@ public class TimeSheet implements JSONAble {
                 .sorted()
                 .forEach(timeRecord -> records.put(timeRecord.toJSON()));
         json.put("timeRecords", records);
-        return null;
+        return json;
     }
 }

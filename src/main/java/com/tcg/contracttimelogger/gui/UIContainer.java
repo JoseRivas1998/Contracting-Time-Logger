@@ -2,7 +2,7 @@ package com.tcg.contracttimelogger.gui;
 
 public interface UIContainer {
 
-    void onAfterViewCreated();
+    String onAfterViewCreated();
     void onViewDestroyed();
 
 }

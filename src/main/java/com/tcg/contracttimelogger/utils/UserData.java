@@ -1,5 +1,6 @@
 package com.tcg.contracttimelogger.utils;
 
+import com.tcg.contracttimelogger.data.Contract;
 import com.tcg.contracttimelogger.data.JSONAble;
 import com.tcg.contracttimelogger.data.TimeSheet;
 import org.json.JSONArray;
@@ -11,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class UserData implements JSONAble {
+
+    private static final String APP_FILE_PATH = Files.getAppFilePath(AppConstants.CONTRACTS_FILE);
 
     private static UserData instance;
 
@@ -43,19 +46,27 @@ public final class UserData implements JSONAble {
                 this.timeSheets.add(TimeSheet.ofJSON(timeSheet));
             }
         } catch (IOException ioe) {
-            final String path = Files.getAppFilePath(AppConstants.CONTRACTS_FILE);
-            System.out.printf("Unable to read contracts file, writing a new one to %s\n", path);
-            File contractsFile = new File(path);
-            try {
-                Files.writeUTF8File(this.toJSON().toString(), contractsFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            System.out.printf("Unable to read contracts file, writing a new one to %s\n", APP_FILE_PATH);
+            saveData();
+        }
+    }
+
+    public void saveData() {
+        File contractsFile = new File(APP_FILE_PATH);
+        try {
+            Files.writeUTF8File(this.toJSON().toString(), contractsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     public int numberTimeSheets() {
         return timeSheets.size();
+    }
+
+    public void createTimeSheet(Contract contract) {
+        this.timeSheets.add(TimeSheet.newSheet(contract));
+        saveData();
     }
 
     @Override

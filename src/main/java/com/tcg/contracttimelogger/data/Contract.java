@@ -63,4 +63,9 @@ public final class Contract implements JSONAble {
     public int hashCode() {
         return Objects.hash(name, description, address, centsPerHour);
     }
+
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }

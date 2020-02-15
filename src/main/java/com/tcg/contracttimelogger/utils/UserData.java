@@ -69,6 +69,10 @@ public final class UserData implements JSONAble {
         saveData();
     }
 
+    public List<TimeSheet> timeSheets() {
+        return new ArrayList<>(this.timeSheets);
+    }
+
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();

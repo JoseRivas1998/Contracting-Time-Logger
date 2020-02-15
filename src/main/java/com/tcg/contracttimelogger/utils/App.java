@@ -40,4 +40,15 @@ public class App {
         mainStage.setTitle(title);
     }
 
+    public void setMainStageOnClose() {
+        mainStage.setOnCloseRequest(event -> {
+            if(mainUIContainer != null) {
+                mainUIContainer.onViewDestroyed();
+                mainUIContainer = null;
+            }
+            UserData userData = UserData.getInstance();
+            userData.saveData();
+        });
+    }
+
 }

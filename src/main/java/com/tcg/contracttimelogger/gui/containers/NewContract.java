@@ -91,6 +91,7 @@ public class NewContract extends VBox implements UIContainer {
             if(result.isPresent() && result.get() == ButtonType.OK) {
                 userData.createTimeSheet(Contract.of(name, description, centsPerHour, address));
                 userData.saveData();
+                app.switchContainer(new TimeSheetView());
             }
         });
 

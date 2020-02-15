@@ -72,7 +72,7 @@ public class TimeSheet implements JSONAble {
                 .collect(Collectors.toList());
     }
 
-    private Optional<TimeRecord> getClockedInRecord() {
+    public Optional<TimeRecord> getClockedInRecord() {
         return timeRecords
                 .stream()
                 .filter(timeRecord -> !timeRecord.isClockedOut())

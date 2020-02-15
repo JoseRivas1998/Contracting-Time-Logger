@@ -99,7 +99,7 @@ public class TimeRecord implements JSONAble, Comparable<TimeRecord> {
         if(this.isClockedOut()) {
             json.put("clockOut", this.clockOut.toString());
         }
-        return null;
+        return json;
     }
 
     @Override

@@ -72,6 +72,10 @@ public class TimeSheet implements JSONAble {
                 .collect(Collectors.toList());
     }
 
+    public List<TimeRecord> allTimeRecords() {
+        return new ArrayList<>(timeRecords);
+    }
+
     public Optional<TimeRecord> getClockedInRecord() {
         return timeRecords
                 .stream()

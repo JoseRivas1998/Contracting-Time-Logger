@@ -29,12 +29,13 @@ public class App {
         return app;
     }
 
+    public void initLayout() {
+        mainLayout = new BorderPane();
+        mainScene = new Scene(mainLayout, 1280, 720);
+        mainStage.setScene(mainScene);
+    }
+
     public  <T extends Parent & UIContainer> void switchContainer(T uiContainer) {
-        if(mainScene == null) {
-            mainLayout = new BorderPane();
-            mainScene = new Scene(mainLayout, 800, 600);
-            mainStage.setScene(mainScene);
-        }
         if(mainUIContainer != null) mainUIContainer.onViewDestroyed();
         mainUIContainer = uiContainer;
         mainLayout.setCenter(uiContainer);

@@ -15,6 +15,7 @@ public class ContractTimeLogger extends Application {
         app.mainStage = stage;
         UserData userData = UserData.getInstance();
         userData.loadData();
+        app.initLayout();
         app.switchContainer(userData.numberTimeSheets() == 0 ? new NewContract() : new TimeSheetView());
         app.mainStage.show();
         app.setMainStageOnClose();

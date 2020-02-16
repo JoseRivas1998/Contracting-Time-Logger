@@ -6,13 +6,13 @@ import com.tcg.contracttimelogger.data.Contract;
 import com.tcg.contracttimelogger.data.TimeSheet;
 import com.tcg.contracttimelogger.gui.UIContainer;
 import com.tcg.contracttimelogger.gui.components.views.TimeSheetListView;
+import com.tcg.contracttimelogger.gui.components.views.TimeSheetTableView;
 import com.tcg.contracttimelogger.utils.AppConstants;
 import com.tcg.contracttimelogger.utils.UserData;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 
@@ -24,6 +24,7 @@ public class TimeSheetView extends GridPane implements UIContainer {
     private final Label lastClockedInLabel;
     private final Button clockInOutBtn;
     private final Label selectedContractLabel;
+    private final TimeSheetTableView tableView;
 
     public TimeSheetView() {
         super();
@@ -36,12 +37,14 @@ public class TimeSheetView extends GridPane implements UIContainer {
         clockInOutBtn = new Button();
         selectedContractLabel = new Label();
 
+        this.tableView = new TimeSheetTableView();
+
         initTimeSheetListView();
 
-        TableView tableView = new TableView<>();
         GridPane.setVgrow(tableView, Priority.ALWAYS);
         GridPane.setHgrow(tableView, Priority.ALWAYS);
         this.add(tableView, 1, 1, 2, 1);
+        this.tableView.setTimeSheet(this.selectedTimeSheet());
         initClockInClockOutRow();
 
         this.add(selectedContractLabel, 1, 0);
@@ -80,6 +83,7 @@ public class TimeSheetView extends GridPane implements UIContainer {
                 UserData userData = UserData.getInstance();
                 userData.saveData();
                 updateClockInLabel();
+                this.tableView.setTimeSheet(this.selectedTimeSheet());
             });
         } else {
             lastClockedInLabel.setText("Not currently clocked in, click the button to clock in.");
@@ -89,6 +93,7 @@ public class TimeSheetView extends GridPane implements UIContainer {
                 UserData userData = UserData.getInstance();
                 userData.saveData();
                 updateClockInLabel();
+                this.tableView.setTimeSheet(this.selectedTimeSheet());
             });
         }
     }
@@ -100,6 +105,7 @@ public class TimeSheetView extends GridPane implements UIContainer {
         this.timeSheetListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             updateClockInLabel();
             updateSelectedContractLabel();
+            this.tableView.setTimeSheet(this.selectedTimeSheet());
         });
 
         GridPane.setVgrow(this.timeSheetListView, Priority.ALWAYS);

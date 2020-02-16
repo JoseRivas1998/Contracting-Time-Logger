@@ -2,6 +2,7 @@ package com.tcg.contracttimelogger.utils;
 
 import com.tcg.contracttimelogger.data.Contract;
 import com.tcg.contracttimelogger.data.JSONAble;
+import com.tcg.contracttimelogger.data.Profile;
 import com.tcg.contracttimelogger.data.TimeSheet;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,9 +19,11 @@ public final class UserData implements JSONAble {
     private static UserData instance;
 
     private List<TimeSheet> timeSheets;
+    private Profile profile;
 
     private UserData() {
         this.timeSheets = new ArrayList<>();
+        this.profile = null;
     }
 
     public static UserData getInstance() {
@@ -44,6 +47,9 @@ public final class UserData implements JSONAble {
             for (int i = 0; i < timeSheetsArr.length(); i++) {
                 JSONObject timeSheet = timeSheetsArr.getJSONObject(i);
                 this.timeSheets.add(TimeSheet.ofJSON(timeSheet));
+            }
+            if(json.has("profile")) {
+                this.profile = Profile.ofJSON(json.getJSONObject("profile"));
             }
         } catch (IOException ioe) {
             System.out.printf("Unable to read contracts file, writing a new one to %s\n", APP_FILE_PATH);
@@ -73,6 +79,14 @@ public final class UserData implements JSONAble {
         return new ArrayList<>(this.timeSheets);
     }
 
+    public boolean hasProfile() {
+        return this.profile != null;
+    }
+
+    public void setProfile(Profile profile) {
+        this.profile = profile;
+    }
+
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
@@ -81,6 +95,9 @@ public final class UserData implements JSONAble {
             timeSheetArr.put(timeSheet.toJSON());
         }
         json.put("timeSheets", timeSheetArr);
+        if(this.hasProfile()) {
+            json.put("profile", this.profile.toJSON());
+        }
         return json;
     }
 }

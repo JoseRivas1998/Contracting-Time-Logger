@@ -88,10 +88,10 @@ public class NewContract extends VBox implements UIContainer {
             confirmation.setContentText(String.format("%s\n%s\n$%.2f/h\n%s",
                     name, address, centsPerHour / 100.0, description));
             Optional<ButtonType> result = confirmation.showAndWait();
-            if(result.isPresent() && result.get() == ButtonType.OK) {
+            if (result.isPresent() && result.get() == ButtonType.OK) {
                 userData.createTimeSheet(Contract.of(name, description, centsPerHour, address));
                 userData.saveData();
-                app.switchContainer(new TimeSheetView());
+                app.switchContainer(userData.hasProfile() ? new TimeSheetView() : new ProfileInput());
             }
         });
 
@@ -103,7 +103,10 @@ public class NewContract extends VBox implements UIContainer {
                 ErrorDialog errorDialog = new ErrorDialog("No Timesheets", null, "There are no existing timesheets, please add one to continue.");
                 errorDialog.initOwner(App.instance().mainStage);
                 errorDialog.showAndWait();
+                return;
             }
+            App app = App.instance();
+            app.switchContainer(userData.hasProfile() ? new TimeSheetView() : new ProfileInput());
         });
 
         getChildren().addAll(new HBox(AppConstants.HUD_SPACING, addBtn, cancelBtn));

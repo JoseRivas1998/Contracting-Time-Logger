@@ -55,19 +55,19 @@ public class ProfileInput extends GridPane implements UIContainer {
             final USStateComboBox.USState state = stateBox.getValue();
             final String zipCode = zipCodeField.getText().trim();
             ErrorDialog errorDialog = null;
-            if(name.isEmpty()) {
+            if (name.isEmpty()) {
                 errorDialog = new ErrorDialog("No Name", null, "You must enter a name.");
-            } else if(street.isEmpty()) {
+            } else if (street.isEmpty()) {
                 errorDialog = new ErrorDialog("No Street Address", null, "You must enter a street address.");
-            } else if(city.isEmpty()) {
+            } else if (city.isEmpty()) {
                 errorDialog = new ErrorDialog("No City", null, "You must enter a city.");
-            } else if(state == null) {
+            } else if (state == null) {
                 errorDialog = new ErrorDialog("No State", null, "You must select a state.");
-            } else if(zipCode.isEmpty()) {
+            } else if (zipCode.isEmpty()) {
                 errorDialog = new ErrorDialog("No Zip Code", null, "You must enter a zip code.");
             }
             App app = App.instance();
-            if(errorDialog != null) {
+            if (errorDialog != null) {
                 errorDialog.initOwner(app.mainStage);
                 errorDialog.showAndWait();
                 return;
@@ -82,8 +82,8 @@ public class ProfileInput extends GridPane implements UIContainer {
         cancel.setOnAction(event -> {
             UserData userData = UserData.getInstance();
             App app = App.instance();
-            if(userData.hasProfile()) {
-                app.switchContainer(new TimeSheetView());
+            if (userData.hasProfile()) {
+                app.switchContainer(userData.numberTimeSheets() == 0 ? new NewContract() : new TimeSheetView());
             } else {
                 ErrorDialog errorDialog = new ErrorDialog("No profile", null, "You must enter a profile.");
                 errorDialog.initOwner(app.mainStage);
@@ -94,6 +94,22 @@ public class ProfileInput extends GridPane implements UIContainer {
         this.setPadding(AppConstants.padding());
         this.setHgap(AppConstants.HUD_SPACING);
         this.setVgap(AppConstants.HUD_SPACING);
+
+        UserData userData = UserData.getInstance();
+        if (userData.hasProfile()) {
+            Profile profile = userData.getProfile();
+            nameField.setText(profile.name);
+            streetField.setText(profile.address.street);
+            cityField.setText(profile.address.city);
+            zipCodeField.setText(profile.address.zipCode);
+            USStateComboBox.USState state = null;
+            for (int i = 0; i < USStateComboBox.USState.values().length && state == null; ++i) {
+                if(USStateComboBox.USState.values()[i].stateCode.equals(profile.address.state)) {
+                    state = USStateComboBox.USState.values()[i];
+                }
+            }
+            if(state != null) stateBox.setValue(state);
+        }
 
 //        this.setGridLinesVisible(true);
 

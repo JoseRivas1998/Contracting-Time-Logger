@@ -1,6 +1,7 @@
 package com.tcg.contracttimelogger.utils;
 
 import com.tcg.contracttimelogger.gui.UIContainer;
+import com.tcg.contracttimelogger.gui.components.menu.TopMenuBar;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -31,6 +32,7 @@ public class App {
 
     public void initLayout() {
         mainLayout = new BorderPane();
+        mainLayout.setTop(new TopMenuBar());
         mainScene = new Scene(mainLayout, 1280, 720);
         mainStage.setScene(mainScene);
     }

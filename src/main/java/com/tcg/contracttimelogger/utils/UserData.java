@@ -100,4 +100,8 @@ public final class UserData implements JSONAble {
         }
         return json;
     }
+
+    public Profile getProfile() {
+        return this.profile;
+    }
 }

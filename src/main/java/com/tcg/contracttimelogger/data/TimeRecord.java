@@ -52,7 +52,7 @@ public class TimeRecord implements JSONAble, Comparable<TimeRecord> {
             throw new IllegalStateException("This time record has already been clocked out");
         }
         if(clockOut.isBefore(clockIn)) {
-            throw new IllegalArgumentException("Cannot clock out after clock in");
+            throw new IllegalArgumentException("Cannot clock out before clock in");
         }
         this.clockOut = clockOut;
     }

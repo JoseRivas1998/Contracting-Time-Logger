@@ -1,12 +1,16 @@
 package com.tcg.contracttimelogger.gui.containers;
 
+import com.itextpdf.text.DocumentException;
 import com.tcg.contracttimelogger.concurrency.ClockedInTimeDisplayThread;
 import com.tcg.contracttimelogger.data.Address;
 import com.tcg.contracttimelogger.data.Contract;
 import com.tcg.contracttimelogger.data.TimeSheet;
 import com.tcg.contracttimelogger.gui.UIContainer;
+import com.tcg.contracttimelogger.gui.components.dialogs.ErrorDialog;
 import com.tcg.contracttimelogger.gui.components.views.TimeSheetListView;
 import com.tcg.contracttimelogger.gui.components.views.TimeSheetTableView;
+import com.tcg.contracttimelogger.reports.InvoiceGenerator;
+import com.tcg.contracttimelogger.utils.App;
 import com.tcg.contracttimelogger.utils.AppConstants;
 import com.tcg.contracttimelogger.utils.UserData;
 import javafx.geometry.HPos;
@@ -18,6 +22,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
+import java.io.FileNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -82,7 +87,15 @@ public class TimeSheetView extends GridPane implements UIContainer {
         generateInvoiceBtn.setOnAction(event -> {
             LocalDate start = invoiceStartDatePicker.getValue();
             LocalDate end = invoiceEndDatePicker.getValue();
-            System.out.printf("%s - %s\n", start, end);
+            TimeSheet timeSheet = selectedTimeSheet();
+            InvoiceGenerator gen = InvoiceGenerator.newInstance();
+            try {
+                gen.generate(timeSheet, start, end);
+            } catch (FileNotFoundException | DocumentException e) {
+                ErrorDialog dialog = new ErrorDialog(e);
+                dialog.initOwner(App.instance().mainStage);
+                dialog.showAndWait();
+            }
         });
         this.add(invoiceBox, 1, 1);
     }

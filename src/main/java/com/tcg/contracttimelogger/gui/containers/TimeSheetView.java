@@ -57,6 +57,15 @@ public class TimeSheetView extends GridPane implements UIContainer {
         this.tableView.setTimeSheet(this.selectedTimeSheet());
         initClockInClockOutRow();
 
+        initInvoiceRow();
+
+        this.add(selectedContractLabel, 1, 0);
+        updateSelectedContractLabel();
+
+//        this.setGridLinesVisible(true);
+    }
+
+    private void initInvoiceRow() {
         final HBox invoiceBox = new HBox(AppConstants.HUD_SPACING, invoiceStartDatePicker, invoiceEndDatePicker, generateInvoiceBtn);
         invoiceStartDatePicker.setValue(LocalDate.now().withDayOfMonth(1));
         invoiceEndDatePicker.setValue(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
@@ -70,12 +79,12 @@ public class TimeSheetView extends GridPane implements UIContainer {
                 invoiceEndDatePicker.setValue(invoiceStartDatePicker.getValue());
             }
         });
+        generateInvoiceBtn.setOnAction(event -> {
+            LocalDate start = invoiceStartDatePicker.getValue();
+            LocalDate end = invoiceEndDatePicker.getValue();
+            System.out.printf("%s - %s\n", start, end);
+        });
         this.add(invoiceBox, 1, 1);
-
-        this.add(selectedContractLabel, 1, 0);
-        updateSelectedContractLabel();
-
-//        this.setGridLinesVisible(true);
     }
 
     private void updateSelectedContractLabel() {

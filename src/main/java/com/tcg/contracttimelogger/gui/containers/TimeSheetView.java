@@ -12,10 +12,13 @@ import com.tcg.contracttimelogger.utils.UserData;
 import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class TimeSheetView extends GridPane implements UIContainer {
@@ -25,6 +28,10 @@ public class TimeSheetView extends GridPane implements UIContainer {
     private final Button clockInOutBtn;
     private final Label selectedContractLabel;
     private final TimeSheetTableView tableView;
+
+    private final DatePicker invoiceStartDatePicker;
+    private final DatePicker invoiceEndDatePicker;
+    private final Button generateInvoiceBtn;
 
     public TimeSheetView() {
         super();
@@ -36,6 +43,9 @@ public class TimeSheetView extends GridPane implements UIContainer {
         lastClockedInLabel = new Label();
         clockInOutBtn = new Button();
         selectedContractLabel = new Label();
+        invoiceStartDatePicker = new DatePicker();
+        invoiceEndDatePicker = new DatePicker();
+        generateInvoiceBtn = new Button("Generate Invoice");
 
         this.tableView = new TimeSheetTableView();
 
@@ -43,9 +53,24 @@ public class TimeSheetView extends GridPane implements UIContainer {
 
         GridPane.setVgrow(tableView, Priority.ALWAYS);
         GridPane.setHgrow(tableView, Priority.ALWAYS);
-        this.add(tableView, 1, 1, 2, 1);
+        this.add(tableView, 1, 2, 2, 1);
         this.tableView.setTimeSheet(this.selectedTimeSheet());
         initClockInClockOutRow();
+
+        final HBox invoiceBox = new HBox(AppConstants.HUD_SPACING, invoiceStartDatePicker, invoiceEndDatePicker, generateInvoiceBtn);
+        invoiceStartDatePicker.setValue(LocalDate.now().withDayOfMonth(1));
+        invoiceEndDatePicker.setValue(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
+        invoiceStartDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isAfter(invoiceEndDatePicker.getValue())) {
+                invoiceStartDatePicker.setValue(invoiceEndDatePicker.getValue());
+            }
+        });
+        invoiceEndDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.isBefore(invoiceStartDatePicker.getValue())) {
+                invoiceEndDatePicker.setValue(invoiceStartDatePicker.getValue());
+            }
+        });
+        this.add(invoiceBox, 1, 1);
 
         this.add(selectedContractLabel, 1, 0);
         updateSelectedContractLabel();
@@ -66,8 +91,8 @@ public class TimeSheetView extends GridPane implements UIContainer {
         lastClockedInLabel.setAlignment(Pos.BASELINE_RIGHT);
         GridPane.setHgrow(lastClockedInLabel, Priority.ALWAYS);
         GridPane.setHalignment(lastClockedInLabel, HPos.RIGHT);
-        this.add(lastClockedInLabel, 1, 2);
-        this.add(clockInOutBtn, 2, 2);
+        this.add(lastClockedInLabel, 1, 3);
+        this.add(clockInOutBtn, 2, 3);
 
         updateClockInLabel();
 
@@ -86,6 +111,7 @@ public class TimeSheetView extends GridPane implements UIContainer {
                 this.tableView.setTimeSheet(this.selectedTimeSheet());
             });
         } else {
+            ClockedInTimeDisplayThread.getInstance().stop();
             lastClockedInLabel.setText("Not currently clocked in, click the button to clock in.");
             clockInOutBtn.setText("Clock In");
             clockInOutBtn.setOnAction(event -> {
@@ -111,7 +137,7 @@ public class TimeSheetView extends GridPane implements UIContainer {
         GridPane.setVgrow(this.timeSheetListView, Priority.ALWAYS);
 
         this.timeSheetListView.getSelectionModel().selectFirst();
-        this.add(timeSheetListView, 0, 0, 1, 3);
+        this.add(timeSheetListView, 0, 0, 1, 4);
     }
 
     private TimeSheet selectedTimeSheet() {

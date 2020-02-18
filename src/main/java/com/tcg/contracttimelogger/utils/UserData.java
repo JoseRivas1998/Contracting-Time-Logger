@@ -20,6 +20,7 @@ public final class UserData implements JSONAble {
 
     private List<TimeSheet> timeSheets;
     private Profile profile;
+    private String lastSaveLocation = "";
 
     private UserData() {
         this.timeSheets = new ArrayList<>();
@@ -50,6 +51,9 @@ public final class UserData implements JSONAble {
             }
             if(json.has("profile")) {
                 this.profile = Profile.ofJSON(json.getJSONObject("profile"));
+            }
+            if(json.has("lastSaveLocation")) {
+                this.lastSaveLocation = json.getString("lastSaveLocation");
             }
         } catch (IOException ioe) {
             System.out.printf("Unable to read contracts file, writing a new one to %s\n", APP_FILE_PATH);
@@ -87,6 +91,14 @@ public final class UserData implements JSONAble {
         this.profile = profile;
     }
 
+    public String getLastSaveLocation() {
+        return lastSaveLocation;
+    }
+
+    public void setLastSaveLocation(String lastSaveLocation) {
+        this.lastSaveLocation = lastSaveLocation;
+    }
+
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
@@ -97,6 +109,9 @@ public final class UserData implements JSONAble {
         json.put("timeSheets", timeSheetArr);
         if(this.hasProfile()) {
             json.put("profile", this.profile.toJSON());
+        }
+        if(this.lastSaveLocation.length() > 0) {
+            json.put("lastSaveLocation", this.lastSaveLocation);
         }
         return json;
     }

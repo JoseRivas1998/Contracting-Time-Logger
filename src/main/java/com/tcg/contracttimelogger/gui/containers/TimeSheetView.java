@@ -22,7 +22,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
+import java.awt.*;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -90,8 +93,11 @@ public class TimeSheetView extends GridPane implements UIContainer {
             TimeSheet timeSheet = selectedTimeSheet();
             InvoiceGenerator gen = InvoiceGenerator.newInstance();
             try {
-                gen.generate(timeSheet, start, end);
-            } catch (FileNotFoundException | DocumentException e) {
+                File file  = gen.generate(timeSheet, start, end);
+                if(file != null) {
+                    Desktop.getDesktop().open(file);
+                }
+            } catch (DocumentException | IOException e) {
                 ErrorDialog dialog = new ErrorDialog(e);
                 dialog.initOwner(App.instance().mainStage);
                 dialog.showAndWait();

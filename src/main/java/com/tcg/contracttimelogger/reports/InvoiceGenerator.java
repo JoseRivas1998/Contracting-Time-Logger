@@ -14,60 +14,59 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 
-import javax.print.Doc;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class InvoiceGenerator {
 
     private Document pdfDocument;
+    private final UserData userData = UserData.getInstance();
 
     public static InvoiceGenerator newInstance() {
         return new InvoiceGenerator();
     }
 
     public File generate(TimeSheet timeSheet, LocalDate invoiceStartDate, LocalDate invoiceEndDate) throws FileNotFoundException, DocumentException {
-        if (pdfDocument != null) {
-            throw new IllegalStateException("This generator has already been activated");
-        }
-        FileChooser fileChooser = new FileChooser();
-        UserData userData = UserData.getInstance();
-        if(userData.getLastSaveLocation().length() > 0) {
-            fileChooser.setInitialDirectory(new File(userData.getLastSaveLocation()));
-        }
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
-        App app = App.instance();
-        File file = fileChooser.showSaveDialog(app.mainStage);
-        if(file == null) return null;
-        if (file.exists()) {
-            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("File Exists");
-            confirm.setContentText("That file already exists, overwrite the file?");
-            confirm.initOwner(app.mainStage);
-            Optional<ButtonType> result = confirm.showAndWait();
-            if (result.isPresent() && result.get() != ButtonType.OK) {
-                return null;
-            }
-        }
-        userData.setLastSaveLocation(file.getParent());
-        userData.saveData();
+        if (pdfDocument != null) throw new IllegalStateException("This generator has already been activated");
+
+        File file = new InvoiceFileSelector().selectFileToSaveTo();
+        if (file == null) return null;
+
+        setUserDataLastSaveLocation(file);
+
+        writeDocument(timeSheet, invoiceStartDate, invoiceEndDate, file);
+        return file;
+    }
+
+    private void writeDocument(TimeSheet timeSheet, LocalDate invoiceStartDate, LocalDate invoiceEndDate, File file) throws DocumentException, FileNotFoundException {
+        setupDocument(file);
+        writeDocumentContent(timeSheet, invoiceStartDate, invoiceEndDate);
+        pdfDocument.close();
+    }
+
+    private void setupDocument(File file) throws DocumentException, FileNotFoundException {
         pdfDocument = new Document();
         PdfWriter.getInstance(pdfDocument, new FileOutputStream(file));
         pdfDocument.open();
+    }
 
+    private void writeDocumentContent(TimeSheet timeSheet, LocalDate invoiceStartDate, LocalDate invoiceEndDate) throws DocumentException {
         addHeader();
         addName();
         addUserAddress();
         addContractAddress(timeSheet);
         addInvoice(timeSheet, invoiceStartDate, invoiceEndDate);
+    }
 
-        pdfDocument.close();
-        return file;
+    private void setUserDataLastSaveLocation(File file) {
+        userData.setLastSaveLocation(file.getParent());
+        userData.saveData();
     }
 
     private void addHeader() throws DocumentException {
@@ -111,25 +110,21 @@ public final class InvoiceGenerator {
         final PdfPTable table = new PdfPTable(5);
 
         Font invoiceDateFont = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
-        final String invoiceDate = "Invoice Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("M/d/YYYY"));
+        final String invoiceDate = "Invoice Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("M/d/yyyy"));
         pdfDocument.add(new Paragraph(invoiceDate + "\n\n", invoiceDateFont));
 
         Stream.of("Clock In", "Clock Out", "Hours", "Rate", "Amount")
-                .forEach(columnTitle -> {
-                    PdfPCell header = new PdfPCell();
-                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    header.setPhrase(new Phrase(columnTitle));
-                    header.setHorizontalAlignment(Element.ALIGN_CENTER);
-                    table.addCell(header);
-                });
+                .map(this::createTableColumnLabel)
+                .forEach(table::addCell);
 
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/YYYY h:mm:ss a");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy h:mm:ss a");
         final Contract contract = timeSheet.getContract();
 
         double totalHoursWorked = 0;
         final String rate = String.format("$%.2f", contract.centsPerHour / 100.0);
 
-        for (TimeRecord timeRecord : timeSheet.recordsBetween(start, end)) {
+        final List<TimeRecord> timeRecords = timeSheet.recordsBetween(start, end);
+        for (TimeRecord timeRecord : timeRecords) {
             final String clockIn = timeRecord.clockIn.format(formatter);
             final String clockOut = timeRecord.getClockOut().format(formatter);
             final String hours = String.format("%.2f", timeRecord.hoursWorked());
@@ -142,9 +137,7 @@ public final class InvoiceGenerator {
             table.addCell(amount);
         }
 
-        PdfPCell total = new PdfPCell(new Phrase("Total"));
-        total.setHorizontalAlignment(Element.ALIGN_RIGHT);
-        total.setColspan(2);
+        PdfPCell total = createTotalLabelCell();
         table.addCell(total);
 
         final String hoursWorked = String.format("%.2f", totalHoursWorked);
@@ -159,4 +152,62 @@ public final class InvoiceGenerator {
         pdfDocument.add(table);
     }
 
+    private PdfPCell createTotalLabelCell() {
+        PdfPCell total = new PdfPCell(new Phrase("Total"));
+        total.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        total.setColspan(2);
+        return total;
+    }
+
+    private PdfPCell createTableColumnLabel(String columnTitle) {
+        PdfPCell header = new PdfPCell();
+        header.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        header.setPhrase(new Phrase(columnTitle));
+        header.setHorizontalAlignment(Element.ALIGN_CENTER);
+        return header;
+    }
+
+    private static class InvoiceFileSelector {
+
+        private FileChooser fileChooser;
+        private UserData userData;
+        private App app;
+
+        public File selectFileToSaveTo() {
+            userData = UserData.getInstance();
+            app = App.instance();
+            setupFileChooser();
+
+            File file = fileChooser.showSaveDialog(app.mainStage);
+            if(file == null) return null;
+            if (file.exists()) {
+                Optional<ButtonType> result = showReplaceFileConfirmationDialog();
+                if (result.isPresent() && result.get() != ButtonType.OK) {
+                    return null;
+                }
+            }
+
+            return file;
+        }
+
+        private Optional<ButtonType> showReplaceFileConfirmationDialog() {
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("File Exists");
+            confirm.setContentText("That file already exists, overwrite the file?");
+            confirm.initOwner(app.mainStage);
+            return confirm.showAndWait();
+        }
+
+        private void setupFileChooser() {
+            fileChooser = new FileChooser();
+            setInitialSelectionDirectory();
+            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        }
+
+        private void setInitialSelectionDirectory() {
+            if(userData.hasLastSaveLocation()) {
+                fileChooser.setInitialDirectory(new File(userData.getLastSaveLocation()));
+            }
+        }
+    }
 }

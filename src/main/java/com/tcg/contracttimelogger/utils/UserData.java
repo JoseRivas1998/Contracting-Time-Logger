@@ -99,6 +99,10 @@ public final class UserData implements JSONAble {
         this.lastSaveLocation = lastSaveLocation;
     }
 
+    public boolean hasLastSaveLocation() {
+        return this.lastSaveLocation.length() > 0;
+    }
+
     @Override
     public JSONObject toJSON() {
         JSONObject json = new JSONObject();
